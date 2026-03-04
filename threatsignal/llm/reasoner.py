@@ -1,11 +1,14 @@
 """LLM-based risk reasoning module."""
 from __future__ import annotations
+
 import json
 import logging
 import time
+
 from openai import OpenAI, RateLimitError
-from threatsignal.models.schemas import LLMAssessment, AttackSurface, SimilarIncident
+
 from threatsignal.llm.prompts import SYSTEM_PROMPT, build_user_prompt
+from threatsignal.models.schemas import AttackSurface, LLMAssessment, SimilarIncident
 
 logger = logging.getLogger(__name__)
 

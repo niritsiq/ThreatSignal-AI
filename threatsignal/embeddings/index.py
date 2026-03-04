@@ -1,9 +1,12 @@
 """FAISS index wrapper for breach case similarity search."""
 from __future__ import annotations
+
 import json
 import logging
-import numpy as np
+
 import faiss
+import numpy as np
+
 from threatsignal.models.schemas import SimilarIncident
 
 logger = logging.getLogger(__name__)

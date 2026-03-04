@@ -1,6 +1,7 @@
 """Contract tests for LLM output schema validation."""
 import pytest
 from pydantic import ValidationError
+
 from threatsignal.models.schemas import LLMAssessment
 
 

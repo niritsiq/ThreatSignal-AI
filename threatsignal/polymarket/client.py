@@ -1,7 +1,10 @@
 """Polymarket API client for prediction market probability lookup."""
 from __future__ import annotations
+
 import logging
+
 import httpx
+
 from threatsignal.models.schemas import PolymarketResult
 
 logger = logging.getLogger(__name__)

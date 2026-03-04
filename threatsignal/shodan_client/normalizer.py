@@ -1,6 +1,8 @@
 """Normalizes raw Shodan data into structured AttackSurface object."""
 from __future__ import annotations
+
 import logging
+
 from threatsignal.models.schemas import AttackSurface, ServiceInfo
 
 logger = logging.getLogger(__name__)
@@ -46,7 +48,7 @@ class AttackSurfaceNormalizer:
             svc = ServiceInfo(port=port, product=product, version=version, cpe=cpe)
             if svc not in services:
                 services.append(svc)
-            for cve_id in (banner.get("vulns") or {}).keys():
+            for cve_id in (banner.get("vulns") or {}):
                 cves.add(cve_id)
 
         score = self._compute_score(list(ports), list(cves), services)

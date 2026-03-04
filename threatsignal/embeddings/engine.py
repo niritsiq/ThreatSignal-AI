@@ -1,6 +1,8 @@
 """Embedding engine using OpenAI text-embedding-3-small."""
 from __future__ import annotations
+
 import logging
+
 from openai import OpenAI
 
 logger = logging.getLogger(__name__)

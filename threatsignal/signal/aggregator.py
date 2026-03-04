@@ -1,5 +1,6 @@
 """Computes the final risk signal by comparing model vs market probability."""
 from __future__ import annotations
+
 from threatsignal.models.schemas import FinalSignal, PolymarketResult
 
 

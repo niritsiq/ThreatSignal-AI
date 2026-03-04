@@ -1,8 +1,12 @@
 """Shared pytest fixtures for ThreatSignal AI tests."""
 import pytest
+
 from threatsignal.models.schemas import (
-    AttackSurface, ServiceInfo, SimilarIncident,
-    LLMAssessment, PolymarketResult, FinalSignal,
+    AttackSurface,
+    LLMAssessment,
+    PolymarketResult,
+    ServiceInfo,
+    SimilarIncident,
 )
 
 

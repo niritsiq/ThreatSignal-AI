@@ -1,17 +1,25 @@
 """Builds the final report in JSON and CLI-readable format."""
 from __future__ import annotations
+
 import json
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+
+from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from rich import box
+
 from threatsignal.models.schemas import (
-    AnalyzeResponse, AttackSurface, SimilarIncident,
-    LLMAssessment, PolymarketResult, FinalSignal, ReportMeta,
+    AnalyzeResponse,
+    AttackSurface,
+    FinalSignal,
+    LLMAssessment,
+    PolymarketResult,
+    ReportMeta,
+    SimilarIncident,
 )
 
 RISK_COLORS = {"LOW": "green", "MEDIUM": "yellow", "HIGH": "red", "CRITICAL": "bold red"}
@@ -109,7 +117,7 @@ class ReportBuilder:
             console.print(f"  Market        : {pm.question}")
             console.print(f"  Market Prob   : [bold]{pm.probability:.2%}[/bold]")
             console.print(f"  Liquidity     : ${pm.liquidity_usd:,.0f}")
-            console.print(f"  Status        : [green]FOUND[/green]")
+            console.print("  Status        : [green]FOUND[/green]")
         else:
             console.print(f"  Status        : [dim]NOT FOUND[/dim] — {pm.note}")
 

@@ -1,20 +1,23 @@
 """ThreatSignal AI — FastAPI application and CLI entry point."""
 from __future__ import annotations
+
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+
 import typer
 from fastapi import FastAPI, HTTPException
+
 from threatsignal.config import settings
-from threatsignal.models.schemas import AnalyzeRequest, AnalyzeResponse
-from threatsignal.shodan_client.client import ShodanClient
-from threatsignal.shodan_client.normalizer import AttackSurfaceNormalizer
 from threatsignal.embeddings.engine import EmbeddingEngine
 from threatsignal.embeddings.index import BreachIndex
 from threatsignal.llm.reasoner import LLMReasoner
+from threatsignal.models.schemas import AnalyzeRequest, AnalyzeResponse
 from threatsignal.polymarket.client import PolymarketClient
-from threatsignal.signal.aggregator import SignalAggregator
 from threatsignal.report.builder import ReportBuilder
+from threatsignal.shodan_client.client import ShodanClient
+from threatsignal.shodan_client.normalizer import AttackSurfaceNormalizer
+from threatsignal.signal.aggregator import SignalAggregator
 
 logging.basicConfig(level=getattr(logging, settings.log_level, logging.INFO))
 logger = logging.getLogger(__name__)
@@ -93,7 +96,7 @@ async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
         )
     except Exception as e:
         logger.error(f"Analysis failed for {request.domain}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # ── CLI ────────────────────────────────────────────────────────────────────────

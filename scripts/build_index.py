@@ -3,17 +3,18 @@ Build the FAISS breach index from breach_cases.jsonl.
 Run once before starting the API: python scripts/build_index.py
 """
 from __future__ import annotations
-import json
+
 import sys
-import numpy as np
-import faiss
 from pathlib import Path
+
+import faiss
+import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from threatsignal.config import settings
-from threatsignal.embeddings.engine import EmbeddingEngine
 from threatsignal.embeddings.breach_dataset import load_cases, save_cases
+from threatsignal.embeddings.engine import EmbeddingEngine
 
 
 def build_index():

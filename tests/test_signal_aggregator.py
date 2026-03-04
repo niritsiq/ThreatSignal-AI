@@ -1,7 +1,8 @@
 """Tests for signal aggregator — written TDD style before implementation was finalized."""
 import pytest
-from threatsignal.signal.aggregator import SignalAggregator
+
 from threatsignal.models.schemas import PolymarketResult
+from threatsignal.signal.aggregator import SignalAggregator
 
 
 @pytest.fixture

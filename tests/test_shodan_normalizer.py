@@ -1,5 +1,6 @@
 """Tests for Shodan attack surface normalizer."""
 import pytest
+
 from threatsignal.shodan_client.normalizer import AttackSurfaceNormalizer
 
 
