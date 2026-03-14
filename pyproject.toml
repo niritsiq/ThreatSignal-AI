@@ -25,3 +25,6 @@ ignore_missing_imports = true
 asyncio_mode = "auto"
 testpaths = ["tests"]
 addopts = "--cov=threatsignal --cov-report=term-missing"
+markers = [
+    "integration: calls real external APIs (Shodan, OpenAI, Polymarket) — requires valid .env keys",
+]
