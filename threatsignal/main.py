@@ -70,12 +70,28 @@ async def _run_analysis(domain: str, time_horizon_days: int) -> AnalyzeResponse:
     surface = AttackSurfaceNormalizer().parse(raw, domain)
 
     # 2. Embeddings + similarity
-    embedding_engine = EmbeddingEngine(settings.openai_api_key, settings.embedding_model)
+    if settings.use_azure:
+        embedding_engine = EmbeddingEngine(
+            api_key=settings.azure_openai_api_key,
+            model=settings.azure_embedding_deployment,
+            azure_endpoint=settings.azure_openai_endpoint,
+            azure_api_version=settings.azure_openai_api_version,
+        )
+    else:
+        embedding_engine = EmbeddingEngine(settings.openai_api_key, settings.embedding_model)
     query_vec = embedding_engine.embed(surface.snapshot_text)
     similar = breach_index.search(query_vec, top_k=settings.top_k_similar)
 
     # 3. LLM assessment
-    llm = LLMReasoner(settings.openai_api_key, settings.llm_model)
+    if settings.use_azure:
+        llm = LLMReasoner(
+            api_key=settings.azure_openai_api_key,
+            model=settings.azure_llm_deployment,
+            azure_endpoint=settings.azure_openai_endpoint,
+            azure_api_version=settings.azure_openai_api_version,
+        )
+    else:
+        llm = LLMReasoner(settings.openai_api_key, settings.llm_model)
     assessment = llm.assess(domain, surface, similar, time_horizon_days)
 
     # 4. Polymarket

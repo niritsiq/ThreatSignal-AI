@@ -1,4 +1,4 @@
-"""LLM-based risk reasoning module."""
+"""LLM-based risk reasoning module — supports OpenAI and Azure OpenAI."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import json
 import logging
 import time
 
-from openai import OpenAI, RateLimitError
+from openai import AzureOpenAI, OpenAI, RateLimitError
 
 from threatsignal.llm.prompts import SYSTEM_PROMPT, build_user_prompt
 from threatsignal.models.schemas import AttackSurface, LLMAssessment, SimilarIncident
@@ -15,8 +15,22 @@ logger = logging.getLogger(__name__)
 
 
 class LLMReasoner:
-    def __init__(self, api_key: str, model: str = "gpt-4o-mini"):
-        self.client = OpenAI(api_key=api_key)
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "gpt-4o-mini",
+        azure_endpoint: str = "",
+        azure_api_version: str = "",
+    ):
+        if azure_endpoint:
+            self.client = AzureOpenAI(
+                azure_endpoint=azure_endpoint,
+                api_key=api_key,
+                api_version=azure_api_version,
+            )
+            logger.info("LLMReasoner using Azure OpenAI endpoint: %s", azure_endpoint)
+        else:
+            self.client = OpenAI(api_key=api_key)
         self.model = model
 
     def assess(
@@ -64,10 +78,10 @@ class LLMReasoner:
                 )
             except RateLimitError:
                 wait = 2**attempt
-                logger.warning(f"LLM rate limit hit, waiting {wait}s (attempt {attempt+1}/3)")
+                logger.warning("LLM rate limit hit, waiting %ds (attempt %d/3)", wait, attempt + 1)
                 time.sleep(wait)
             except (json.JSONDecodeError, KeyError, ValueError) as e:
-                logger.error(f"LLM response parse error (attempt {attempt+1}): {e}")
+                logger.error("LLM response parse error (attempt %d): %s", attempt + 1, e)
                 if attempt == 2:
                     return self._fallback_assessment()
         return self._fallback_assessment()

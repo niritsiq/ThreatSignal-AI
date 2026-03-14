@@ -1,17 +1,31 @@
-"""Embedding engine using OpenAI text-embedding-3-small."""
+"""Embedding engine — supports both OpenAI and Azure OpenAI."""
 
 from __future__ import annotations
 
 import logging
 
-from openai import OpenAI
+from openai import AzureOpenAI, OpenAI
 
 logger = logging.getLogger(__name__)
 
 
 class EmbeddingEngine:
-    def __init__(self, api_key: str, model: str = "text-embedding-3-small"):
-        self.client = OpenAI(api_key=api_key)
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "text-embedding-3-small",
+        azure_endpoint: str = "",
+        azure_api_version: str = "",
+    ):
+        if azure_endpoint:
+            self.client = AzureOpenAI(
+                azure_endpoint=azure_endpoint,
+                api_key=api_key,
+                api_version=azure_api_version,
+            )
+            logger.info("EmbeddingEngine using Azure OpenAI endpoint: %s", azure_endpoint)
+        else:
+            self.client = OpenAI(api_key=api_key)
         self.model = model
 
     def embed(self, text: str) -> list[float]:
