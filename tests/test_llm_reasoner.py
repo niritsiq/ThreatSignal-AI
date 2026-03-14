@@ -14,7 +14,8 @@ from threatsignal.models.schemas import AttackSurface
 
 @pytest.fixture
 def reasoner():
-    return LLMReasoner(api_key="test-key", model="gpt-4o-mini")
+    # use_function_calling=False so tests use the simpler JSON mode path
+    return LLMReasoner(api_key="test-key", model="gpt-4o-mini", use_function_calling=False)
 
 
 @pytest.fixture
