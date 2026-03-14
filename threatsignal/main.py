@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import typer
 from fastapi import FastAPI, HTTPException
@@ -13,12 +15,13 @@ from threatsignal.config import settings
 from threatsignal.embeddings.engine import EmbeddingEngine
 from threatsignal.embeddings.index import BreachIndex
 from threatsignal.llm.reasoner import LLMReasoner
-from threatsignal.models.schemas import AnalyzeRequest, AnalyzeResponse
+from threatsignal.models.schemas import AnalyzeRequest, AnalyzeResponse, TrendResult
 from threatsignal.polymarket.client import PolymarketClient
 from threatsignal.report.builder import ReportBuilder
 from threatsignal.shodan_client.client import ShodanClient
 from threatsignal.shodan_client.normalizer import AttackSurfaceNormalizer
 from threatsignal.signal.aggregator import SignalAggregator
+from threatsignal.signal.trend import RiskTrend
 
 logging.basicConfig(level=getattr(logging, settings.log_level, logging.INFO))
 logger = logging.getLogger(__name__)
@@ -47,6 +50,40 @@ app = FastAPI(
 @app.get("/health")
 def health():
     return {"status": "ok", "version": "1.0.0"}
+
+
+def _load_previous_probability(domain: str, reports_dir: str = "reports") -> float | None:
+    """Find the most recent saved report for a domain and return its LLM probability."""
+    report_path = Path(reports_dir)
+    if not report_path.exists():
+        return None
+    files = sorted(report_path.glob(f"{domain}_*.json"))
+    if not files:
+        return None
+    try:
+        with open(files[-1], encoding="utf-8") as f:
+            data = json.load(f)
+        return data.get("llm_assessment", {}).get("probability")
+    except Exception as e:
+        logger.warning(f"Could not read previous report for {domain}: {e}")
+        return None
+
+
+def _load_previous_probability(domain: str, reports_dir: str = "reports") -> float | None:
+    """Return the LLM probability from the most recent saved report for this domain."""
+    report_path = Path(reports_dir)
+    if not report_path.exists():
+        return None
+    files = sorted(report_path.glob(f"{domain}_*.json"))
+    if not files:
+        return None
+    try:
+        with open(files[-1], encoding="utf-8") as f:
+            data = json.load(f)
+        return data.get("llm_assessment", {}).get("probability")
+    except Exception as e:
+        logger.warning(f"Could not read previous report for {domain}: {e}")
+        return None
 
 
 def _ensure_index_loaded():
@@ -102,7 +139,14 @@ async def _run_analysis(domain: str, time_horizon_days: int) -> AnalyzeResponse:
     signal = SignalAggregator().compute(assessment.probability, polymarket)
 
     # 6. Build report
-    return ReportBuilder().build(domain, time_horizon_days, surface, similar, assessment, polymarket, signal)
+    response = ReportBuilder().build(domain, time_horizon_days, surface, similar, assessment, polymarket, signal)
+
+    # 7. Risk trend — compare current probability against the most recent saved report
+    previous_prob = _load_previous_probability(domain)
+    trend_dict = RiskTrend().compare(assessment.probability, previous_prob)
+    response.trend = TrendResult(**trend_dict)
+
+    return response
 
 
 @app.post("/analyze", response_model=AnalyzeResponse)
@@ -120,7 +164,7 @@ async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
 cli = typer.Typer(help="ThreatSignal AI — Cyber incident risk estimator")
 
 
-@cli.command()
+@cli.command("analyze")
 def analyze_cmd(
     domain: str = typer.Option(..., "--domain", "-d", help="Target domain (e.g. okta.com)"),
     horizon: int = typer.Option(30, "--horizon", "-h", help="Time horizon in days"),

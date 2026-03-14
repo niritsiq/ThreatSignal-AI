@@ -152,4 +152,22 @@ class ReportBuilder:
         console.print(f"  Signal             : [{signal_color}][bold]{sig.signal}[/bold][/{signal_color}]")
         console.print(f"  Interpretation     : {sig.interpretation}")
         console.print(f"\n  [bold]Overall Risk Category: [{color}]{sig.risk_category}[/{color}][/bold]")
+
+        # Section 6: Risk Trend
+        if r.trend is not None:
+            console.print("\n[bold underline][6] RISK TREND[/bold underline]")
+            trend = r.trend
+            direction_icons = {"INCREASING": "↑", "DECREASING": "↓", "STABLE": "→", "NEW": "★"}
+            direction_colors = {"INCREASING": "red", "DECREASING": "green", "STABLE": "yellow", "NEW": "cyan"}
+            icon = direction_icons.get(trend.direction, "?")
+            tc = direction_colors.get(trend.direction, "white")
+            console.print(f"  Direction   : [{tc}][bold]{icon} {trend.direction}[/bold][/{tc}]")
+            if trend.delta is not None:
+                console.print(f"  Delta       : [{tc}]{trend.delta:+.2%}[/{tc}]")
+            console.print(f"  Now         : {trend.current_category}")
+            if trend.previous_category:
+                console.print(f"  Previously  : {trend.previous_category}")
+            if trend.severity_changed:
+                console.print("  [bold yellow]⚠ Severity category changed![/bold yellow]")
+
         console.print(Panel("", box=box.DOUBLE, expand=True))
