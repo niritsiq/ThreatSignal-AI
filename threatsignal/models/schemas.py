@@ -94,6 +94,23 @@ class ReportMeta(BaseModel):
     version: str = "1.0.0"
 
 
+class TrendResult(BaseModel):
+    direction: str  # "INCREASING" | "DECREASING" | "STABLE" | "NEW"
+    delta: Optional[float] = None
+    current_category: str = ""
+    previous_category: Optional[str] = None
+    severity_changed: bool = False
+
+    def format_summary(self) -> str:
+        if self.direction == "NEW":
+            return f"First assessment — current risk: {self.current_category}"
+        arrow = {"INCREASING": "↑", "DECREASING": "↓", "STABLE": "→"}.get(self.direction, "?")
+        change = (
+            f" (severity changed: {self.previous_category} → {self.current_category})" if self.severity_changed else ""
+        )
+        return f"{arrow} {self.direction}  Δ{self.delta:+.1%}{change}"
+
+
 class AnalyzeResponse(BaseModel):
     meta: ReportMeta
     attack_surface: AttackSurface
@@ -101,3 +118,4 @@ class AnalyzeResponse(BaseModel):
     llm_assessment: LLMAssessment
     polymarket: PolymarketResult
     final_signal: FinalSignal
+    trend: Optional[TrendResult] = None
