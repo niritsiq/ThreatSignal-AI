@@ -1,4 +1,5 @@
 """Polymarket API client for prediction market probability lookup."""
+
 from __future__ import annotations
 
 import logging

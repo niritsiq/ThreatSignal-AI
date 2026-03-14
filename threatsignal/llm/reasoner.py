@@ -1,4 +1,5 @@
 """LLM-based risk reasoning module."""
+
 from __future__ import annotations
 
 import json
@@ -62,7 +63,7 @@ class LLMReasoner:
                     completion_tokens=response.usage.completion_tokens,
                 )
             except RateLimitError:
-                wait = 2 ** attempt
+                wait = 2**attempt
                 logger.warning(f"LLM rate limit hit, waiting {wait}s (attempt {attempt+1}/3)")
                 time.sleep(wait)
             except (json.JSONDecodeError, KeyError, ValueError) as e:

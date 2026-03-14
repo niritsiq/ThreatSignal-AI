@@ -1,4 +1,5 @@
 """Tests for signal aggregator — written TDD style before implementation was finalized."""
+
 import pytest
 
 from threatsignal.models.schemas import PolymarketResult

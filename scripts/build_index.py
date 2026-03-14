@@ -2,6 +2,7 @@
 Build the FAISS breach index from breach_cases.jsonl.
 Run once before starting the API: python scripts/build_index.py
 """
+
 from __future__ import annotations
 
 import sys

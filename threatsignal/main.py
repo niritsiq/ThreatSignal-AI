@@ -1,4 +1,5 @@
 """ThreatSignal AI — FastAPI application and CLI entry point."""
+
 from __future__ import annotations
 
 import asyncio
@@ -111,6 +112,7 @@ def analyze_cmd(
 ):
     """Analyze a domain's cyber incident risk."""
     import asyncio
+
     result = asyncio.run(_run_analysis(domain, horizon))
     ReportBuilder().print_cli(result)
     if save:
@@ -125,6 +127,7 @@ def serve(
 ):
     """Start the FastAPI server."""
     import uvicorn
+
     uvicorn.run("threatsignal.main:app", host=host, port=port, reload=False)
 
 

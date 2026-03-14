@@ -1,4 +1,5 @@
 """FAISS index wrapper for breach case similarity search."""
+
 from __future__ import annotations
 
 import json
@@ -38,13 +39,15 @@ class BreachIndex:
             if idx < 0 or idx >= len(self.cases):
                 continue
             case = self.cases[idx]
-            results.append(SimilarIncident(
-                rank=rank,
-                case_id=case.get("case_id", f"case_{idx}"),
-                title=case.get("title", "Unknown"),
-                year=case.get("year", 0),
-                risk_level=case.get("risk_level", "unknown"),
-                similarity_score=round(float(score), 4),
-                key_factors=case.get("key_factors", []),
-            ))
+            results.append(
+                SimilarIncident(
+                    rank=rank,
+                    case_id=case.get("case_id", f"case_{idx}"),
+                    title=case.get("title", "Unknown"),
+                    year=case.get("year", 0),
+                    risk_level=case.get("risk_level", "unknown"),
+                    similarity_score=round(float(score), 4),
+                    key_factors=case.get("key_factors", []),
+                )
+            )
         return results

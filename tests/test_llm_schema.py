@@ -1,4 +1,5 @@
 """Contract tests for LLM output schema validation."""
+
 import pytest
 from pydantic import ValidationError
 
@@ -6,8 +7,9 @@ from threatsignal.models.schemas import LLMAssessment
 
 
 def test_valid_assessment():
-    a = LLMAssessment(risk_level="HIGH", probability=0.31, confidence=0.72,
-                      main_drivers=["driver1"], explanation="test")
+    a = LLMAssessment(
+        risk_level="HIGH", probability=0.31, confidence=0.72, main_drivers=["driver1"], explanation="test"
+    )
     assert a.risk_level == "HIGH"
 
 

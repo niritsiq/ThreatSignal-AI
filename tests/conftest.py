@@ -1,4 +1,5 @@
 """Shared pytest fixtures for ThreatSignal AI tests."""
+
 import pytest
 
 from threatsignal.models.schemas import (
@@ -25,19 +26,31 @@ def sample_surface():
         country="US",
         attack_surface_score=5.5,
         snapshot_text="Domain example.com resolves to 1 IP hosted by Example Corp (US). "
-                      "Open ports: [80, 443, 8443]. CVE indicators: CVE-2022-0778.",
+        "Open ports: [80, 443, 8443]. CVE indicators: CVE-2022-0778.",
     )
 
 
 @pytest.fixture
 def sample_similar():
     return [
-        SimilarIncident(rank=1, case_id="okta-2022", title="Okta 2022 Breach",
-                        year=2022, risk_level="high", similarity_score=0.89,
-                        key_factors=["identity provider", "SSO"]),
-        SimilarIncident(rank=2, case_id="lastpass-2022", title="LastPass 2022",
-                        year=2022, risk_level="critical", similarity_score=0.74,
-                        key_factors=["credentials", "cloud"]),
+        SimilarIncident(
+            rank=1,
+            case_id="okta-2022",
+            title="Okta 2022 Breach",
+            year=2022,
+            risk_level="high",
+            similarity_score=0.89,
+            key_factors=["identity provider", "SSO"],
+        ),
+        SimilarIncident(
+            rank=2,
+            case_id="lastpass-2022",
+            title="LastPass 2022",
+            year=2022,
+            risk_level="critical",
+            similarity_score=0.74,
+            key_factors=["credentials", "cloud"],
+        ),
     ]
 
 

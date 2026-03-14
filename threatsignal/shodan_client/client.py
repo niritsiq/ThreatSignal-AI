@@ -1,4 +1,5 @@
 """Shodan API client — queries domain exposure data."""
+
 from __future__ import annotations
 
 import logging
@@ -10,6 +11,7 @@ logger = logging.getLogger(__name__)
 class ShodanClient:
     def __init__(self, api_key: str):
         import shodan
+
         self.api = shodan.Shodan(api_key)
 
     def query_domain(self, domain: str) -> dict:

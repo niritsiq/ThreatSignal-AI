@@ -1,4 +1,5 @@
 """LLM prompt templates for ThreatSignal AI."""
+
 from __future__ import annotations
 
 SYSTEM_PROMPT = """You are a cybersecurity risk analyst AI with expertise in threat intelligence.

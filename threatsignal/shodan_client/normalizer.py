@@ -1,4 +1,5 @@
 """Normalizes raw Shodan data into structured AttackSurface object."""
+
 from __future__ import annotations
 
 import logging
@@ -48,7 +49,7 @@ class AttackSurfaceNormalizer:
             svc = ServiceInfo(port=port, product=product, version=version, cpe=cpe)
             if svc not in services:
                 services.append(svc)
-            for cve_id in (banner.get("vulns") or {}):
+            for cve_id in banner.get("vulns") or {}:
                 cves.add(cve_id)
 
         score = self._compute_score(list(ports), list(cves), services)
@@ -67,21 +68,21 @@ class AttackSurfaceNormalizer:
 
     def _compute_score(self, ports: list[int], cves: list[str], services: list[ServiceInfo]) -> float:
         score = 0.0
-        score += min(len(ports) / 5.0, 3.0)           # port breadth, max 3
-        score += min(len(cves) * 1.5, 4.0)             # CVE exposure, max 4
+        score += min(len(ports) / 5.0, 3.0)  # port breadth, max 3
+        score += min(len(cves) * 1.5, 4.0)  # CVE exposure, max 4
         if any(p in CRITICAL_PORTS for p in ports):
-            score += 1.0                                # critical port flag
+            score += 1.0  # critical port flag
         if len(ports) > 15:
-            score += 1.0                                # large surface flag
+            score += 1.0  # large surface flag
         if len(services) > 10:
-            score += 1.0                                # many services
+            score += 1.0  # many services
         return min(score, 10.0)
 
     def _build_snapshot(self, surface: AttackSurface, domain: str) -> str:
-        service_desc = ", ".join(
-            f"{s.product} {s.version} (port {s.port})"
-            for s in surface.services[:5]
-        ) or "no services detected"
+        service_desc = (
+            ", ".join(f"{s.product} {s.version} (port {s.port})" for s in surface.services[:5])
+            or "no services detected"
+        )
 
         cve_desc = ", ".join(surface.cve_indicators[:5]) or "none detected"
         hostname_desc = ", ".join(surface.hostnames[:5]) or "none"

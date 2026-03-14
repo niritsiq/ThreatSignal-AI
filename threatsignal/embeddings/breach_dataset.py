@@ -1,4 +1,5 @@
 """Utilities for loading and managing the breach case dataset."""
+
 from __future__ import annotations
 
 import json
