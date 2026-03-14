@@ -17,7 +17,7 @@ set -e  # exit immediately if any command fails
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 RESOURCE_GROUP="threatsignal-rg"
-LOCATION="eastus"
+LOCATION="westeurope"
 ACR_NAME="threatsignalacr"           # must be globally unique — change if taken
 CONTAINER_APP_ENV="threatsignal-env"
 CONTAINER_APP_NAME="threatsignal-api"
