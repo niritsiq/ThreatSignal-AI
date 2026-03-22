@@ -15,7 +15,8 @@ from threatsignal.config import settings
 from threatsignal.embeddings.engine import EmbeddingEngine
 from threatsignal.embeddings.index import BreachIndex
 from threatsignal.llm.reasoner import LLMReasoner
-from threatsignal.models.schemas import AnalyzeRequest, AnalyzeResponse, TrendResult
+from threatsignal.models.schemas import AnalyzeRequest, AnalyzeResponse, NewsSignal, TrendResult
+from threatsignal.news.client import NewsClient
 from threatsignal.polymarket.client import PolymarketClient
 from threatsignal.report.builder import ReportBuilder
 from threatsignal.shodan_client.client import ShodanClient
@@ -102,7 +103,21 @@ async def _run_analysis(domain: str, time_horizon_days: int) -> AnalyzeResponse:
     query_vec = embedding_engine.embed(surface.snapshot_text)
     similar = breach_index.search(query_vec, top_k=settings.top_k_similar)
 
-    # 3. LLM assessment
+    # 3. News signal — fetch recent cyber headlines via SerpAPI
+    news_signal = None
+    if settings.serp_api_key:
+        news_client = NewsClient(api_key=settings.serp_api_key)
+        raw_news = news_client.search(domain)
+        news_signal = NewsSignal(
+            article_count=raw_news.article_count,
+            headlines=raw_news.headlines,
+            risk_boost=raw_news.risk_boost,
+        )
+    else:
+        logger.warning("SERP_API_KEY not set — skipping news signal")
+
+    # 4. LLM assessment — pass headlines so GPT can factor them in
+    news_headlines = news_signal.headlines if news_signal else None
     if settings.use_azure:
         llm = LLMReasoner(
             api_key=settings.azure_openai_api_key,
@@ -112,19 +127,26 @@ async def _run_analysis(domain: str, time_horizon_days: int) -> AnalyzeResponse:
         )
     else:
         llm = LLMReasoner(settings.openai_api_key, settings.llm_model)
-    assessment = llm.assess(domain, surface, similar, time_horizon_days)
+    assessment = llm.assess(domain, surface, similar, time_horizon_days, news_headlines=news_headlines)
 
-    # 4. Polymarket
+    # 5. Polymarket
     pm_client = PolymarketClient()
     polymarket = pm_client.search(domain)
 
-    # 5. Signal
-    signal = SignalAggregator().compute(assessment.probability, polymarket)
+    # 6. Signal — apply news boost to model probability before comparison
+    boosted_prob = assessment.probability
+    if news_signal and news_signal.risk_boost > 0:
+        boosted_prob = min(assessment.probability + news_signal.risk_boost, 1.0)
+        logger.info(
+            "News boost applied: %.2f + %.2f = %.2f", assessment.probability, news_signal.risk_boost, boosted_prob
+        )
+    signal = SignalAggregator().compute(boosted_prob, polymarket)
 
-    # 6. Build report
+    # 7. Build report
     response = ReportBuilder().build(domain, time_horizon_days, surface, similar, assessment, polymarket, signal)
+    response.news = news_signal
 
-    # 7. Risk trend — compare current probability against the most recent saved report
+    # 8. Risk trend — compare current probability against the most recent saved report
     previous_prob = _load_previous_probability(domain)
     trend_dict = RiskTrend().compare(assessment.probability, previous_prob)
     response.trend = TrendResult(**trend_dict)

@@ -124,8 +124,23 @@ class ReportBuilder:
             console.print(f"    - {driver}")
         console.print(f"\n  [italic]{r.llm_assessment.explanation}[/italic]")
 
-        # Section 4: Polymarket
-        console.print("\n[bold underline][4] POLYMARKET SIGNAL[/bold underline]")
+        # Section 4: News Signal
+        if r.news is not None:
+            console.print("\n[bold underline][4] NEWS SIGNAL (SerpAPI)[/bold underline]")
+            news = r.news
+            if news.article_count == 0:
+                console.print("  Articles found  : [dim]0 — no recent cyber news detected[/dim]")
+            else:
+                boost_color = "red" if news.risk_boost >= 0.10 else ("yellow" if news.risk_boost > 0 else "green")
+                console.print(f"  Articles found  : [{boost_color}][bold]{news.article_count}[/bold][/{boost_color}]")
+                console.print(f"  Risk boost      : [{boost_color}]+{news.risk_boost:.0%}[/{boost_color}]")
+                console.print("  Recent headlines:")
+                for headline in news.headlines[:3]:
+                    console.print(f"    - {headline}")
+
+        # Section 5: Polymarket
+
+        console.print("\n[bold underline][5] POLYMARKET SIGNAL[/bold underline]")
         pm = r.polymarket
         if pm.status == "found":
             console.print(f"  Market        : {pm.question}")
@@ -135,8 +150,8 @@ class ReportBuilder:
         else:
             console.print(f"  Status        : [dim]NOT FOUND[/dim] — {pm.note}")
 
-        # Section 5: Final Signal
-        console.print("\n[bold underline][5] FINAL SIGNAL[/bold underline]")
+        # Section 6: Final Signal
+        console.print("\n[bold underline][6] FINAL SIGNAL[/bold underline]")
         sig = r.final_signal
         console.print(f"  Model Probability  : [bold]{sig.model_probability:.2%}[/bold]")
         if sig.market_probability is not None:
@@ -153,9 +168,9 @@ class ReportBuilder:
         console.print(f"  Interpretation     : {sig.interpretation}")
         console.print(f"\n  [bold]Overall Risk Category: [{color}]{sig.risk_category}[/{color}][/bold]")
 
-        # Section 6: Risk Trend
+        # Section 7: Risk Trend
         if r.trend is not None:
-            console.print("\n[bold underline][6] RISK TREND[/bold underline]")
+            console.print("\n[bold underline][7] RISK TREND[/bold underline]")
             trend = r.trend
             direction_icons = {"INCREASING": "^", "DECREASING": "v", "STABLE": "-", "NEW": "*"}
             direction_colors = {"INCREASING": "red", "DECREASING": "green", "STABLE": "yellow", "NEW": "cyan"}

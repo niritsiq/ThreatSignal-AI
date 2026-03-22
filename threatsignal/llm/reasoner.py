@@ -81,6 +81,7 @@ class LLMReasoner:
         surface: AttackSurface,
         similar: list[SimilarIncident],
         horizon_days: int,
+        news_headlines: list[str] | None = None,
     ) -> LLMAssessment:
         """Call LLM and return structured risk assessment via function calling."""
         user_prompt = build_user_prompt(
@@ -91,6 +92,7 @@ class LLMReasoner:
             open_ports=surface.open_ports,
             cve_indicators=surface.cve_indicators,
             similar_incidents=[inc.model_dump() for inc in similar],
+            news_headlines=news_headlines,
         )
 
         for attempt in range(3):

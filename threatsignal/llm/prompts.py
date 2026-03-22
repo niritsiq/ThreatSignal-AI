@@ -36,6 +36,7 @@ def build_user_prompt(
     open_ports: list[int],
     cve_indicators: list[str],
     similar_incidents: list[dict],
+    news_headlines: list[str] | None = None,
 ) -> str:
     similar_section = ""
     for i, inc in enumerate(similar_incidents[:3], start=1):
@@ -53,6 +54,11 @@ def build_user_prompt(
     cve_text = ", ".join(cve_indicators[:5]) if cve_indicators else "None detected"
     port_text = str(open_ports[:15]) if open_ports else "None"
 
+    news_section = ""
+    if news_headlines:
+        headlines_text = "\n".join(f"  - {h}" for h in news_headlines[:5])
+        news_section = f"\n### Recent News Signals\n{headlines_text}\n"
+
     return f"""## Target Domain Analysis
 
 **Domain:** {domain}
@@ -66,8 +72,7 @@ def build_user_prompt(
 **CVE Indicators:** {cve_text}
 
 ### Top Similar Historical Breaches
-{similar_section}
-
+{similar_section}{news_section}
 ### Your Task
 Estimate the probability that {domain} will suffer a significant
 cybersecurity incident (breach, ransomware, DDoS, data leak) within

@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     shodan_api_key: str = ""
     openai_api_key: str = ""
     polymarket_api_key: str = ""
+    serp_api_key: str = ""
     log_level: str = "INFO"
     embedding_model: str = "text-embedding-3-small"
     llm_model: str = "gpt-4o-mini"

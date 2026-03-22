@@ -27,6 +27,7 @@ from threatsignal.embeddings.engine import EmbeddingEngine
 from threatsignal.llm.reasoner import LLMReasoner
 from threatsignal.main import _run_analysis
 from threatsignal.models.schemas import LLMAssessment, PolymarketResult
+from threatsignal.news.client import NewsClient, NewsSignal
 from threatsignal.polymarket.client import PolymarketClient
 from threatsignal.shodan_client.client import ShodanClient
 
@@ -108,6 +109,9 @@ MOCK_POLYMARKET_NOT_FOUND = PolymarketResult(
 # ── Tests ─────────────────────────────────────────────────────────────────────
 
 
+MOCK_NEWS_EMPTY = NewsSignal(article_count=0, headlines=[], risk_boost=0.0)
+
+
 def run_pipeline(polymarket_result=None):
     """Helper: run the full pipeline with mocked external calls."""
     pm = polymarket_result or MOCK_POLYMARKET_NOT_FOUND
@@ -115,7 +119,7 @@ def run_pipeline(polymarket_result=None):
         EmbeddingEngine, "embed", return_value=FAKE_EMBEDDING
     ), patch.object(LLMReasoner, "assess", return_value=MOCK_ASSESSMENT), patch.object(
         PolymarketClient, "search", return_value=pm
-    ):
+    ), patch.object(NewsClient, "search", return_value=MOCK_NEWS_EMPTY):
         return asyncio.run(_run_analysis("okta.com", 30))
 
 
@@ -205,7 +209,7 @@ def test_snapshot_text_is_embedded_correctly():
         EmbeddingEngine, "embed", return_value=FAKE_EMBEDDING
     ) as mock_embed, patch.object(LLMReasoner, "assess", return_value=MOCK_ASSESSMENT), patch.object(
         PolymarketClient, "search", return_value=MOCK_POLYMARKET_NOT_FOUND
-    ):
+    ), patch.object(NewsClient, "search", return_value=MOCK_NEWS_EMPTY):
         asyncio.run(_run_analysis("okta.com", 30))
     # embed was called once with the snapshot text
     mock_embed.assert_called_once()

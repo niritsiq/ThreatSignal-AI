@@ -111,6 +111,13 @@ class TrendResult(BaseModel):
         return f"{arrow} {self.direction}  Δ{self.delta:+.1%}{change}"
 
 
+class NewsSignal(BaseModel):
+    article_count: int = 0
+    headlines: list[str] = []
+    risk_boost: float = 0.0
+    source: str = "serpapi"
+
+
 class AnalyzeResponse(BaseModel):
     meta: ReportMeta
     attack_surface: AttackSurface
@@ -119,3 +126,4 @@ class AnalyzeResponse(BaseModel):
     polymarket: PolymarketResult
     final_signal: FinalSignal
     trend: Optional[TrendResult] = None
+    news: Optional[NewsSignal] = None
