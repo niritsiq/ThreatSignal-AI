@@ -102,3 +102,16 @@ def test_fallback_probability_is_conservative(reasoner, surface):
     with patch.object(reasoner.client.chat.completions, "create", side_effect=Exception("API down")):
         result = reasoner._fallback_assessment()
     assert result.probability <= 0.15
+
+
+def test_llm_reasoner_uses_azure_when_endpoint_given():
+    """When azure_endpoint is set, LLMReasoner must use AzureOpenAI, not OpenAI."""
+    with patch("threatsignal.llm.reasoner.AzureOpenAI") as mock_azure:
+        mock_azure.return_value = MagicMock()
+        LLMReasoner(
+            api_key="azure-key",
+            model="gpt-4o-mini",
+            azure_endpoint="https://foo.openai.azure.com",
+            azure_api_version="2024-10-21",
+        )
+        mock_azure.assert_called_once()

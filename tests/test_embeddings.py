@@ -135,3 +135,30 @@ def test_search_raises_if_index_not_loaded():
     fresh = BreachIndex()
     with pytest.raises(RuntimeError, match="not loaded"):
         fresh.search([0.0] * 1536, top_k=1)
+
+
+def test_embedding_engine_uses_azure_when_endpoint_given():
+    """When azure_endpoint is set, EmbeddingEngine must use AzureOpenAI, not OpenAI."""
+    with patch("threatsignal.embeddings.engine.AzureOpenAI") as mock_azure:
+        mock_client = MagicMock()
+        mock_azure.return_value = mock_client
+        mock_client.embeddings.create.return_value = MagicMock(data=[MagicMock(embedding=FAKE_VECTOR)])
+        engine = EmbeddingEngine(
+            api_key="azure-key",
+            model="text-embedding-3-small",
+            azure_endpoint="https://foo.openai.azure.com",
+            azure_api_version="2024-10-21",
+        )
+        mock_azure.assert_called_once()
+        result = engine.embed("test text")
+        assert len(result) == 1536
+
+
+def test_search_skips_invalid_faiss_padding(loaded_index):
+    """When top_k > ntotal, FAISS pads with -1 indices — those must be filtered out."""
+    query = [0.1] * 1536
+    results = loaded_index.search(query, top_k=100)
+    # index has 21 cases, so at most 21 valid results come back
+    assert len(results) == loaded_index.index.ntotal
+    for r in results:
+        assert r.title

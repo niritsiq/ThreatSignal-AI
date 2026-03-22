@@ -85,3 +85,23 @@ def test_handles_empty_gracefully(normalizer):
     result = normalizer.parse({"hosts": [], "search_results": []}, "unknown.com")
     assert result.open_ports == []
     assert result.attack_surface_score == 0.0
+
+
+def test_search_results_adds_new_ip(normalizer):
+    """IPs found only in search_results (not in hosts) must be included."""
+    raw = {
+        "hosts": [{"ip_str": "1.2.3.4", "org": "Test", "country_name": "US", "hostnames": [], "data": []}],
+        "search_results": [{"ip_str": "5.6.7.8", "port": 80, "product": "", "version": "", "cpe": [], "vulns": {}}],
+    }
+    result = normalizer.parse(raw, "test.com")
+    assert "5.6.7.8" in result.ips
+
+
+def test_search_results_deduplicates_ip_already_in_hosts(normalizer):
+    """An IP already in hosts must not be duplicated when it also appears in search_results."""
+    raw = {
+        "hosts": [{"ip_str": "1.2.3.4", "org": "Test", "country_name": "US", "hostnames": [], "data": []}],
+        "search_results": [{"ip_str": "1.2.3.4", "port": 80, "product": "", "version": "", "cpe": [], "vulns": {}}],
+    }
+    result = normalizer.parse(raw, "test.com")
+    assert result.ips.count("1.2.3.4") == 1

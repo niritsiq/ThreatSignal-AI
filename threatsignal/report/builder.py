@@ -157,7 +157,7 @@ class ReportBuilder:
         if r.trend is not None:
             console.print("\n[bold underline][6] RISK TREND[/bold underline]")
             trend = r.trend
-            direction_icons = {"INCREASING": "↑", "DECREASING": "↓", "STABLE": "→", "NEW": "★"}
+            direction_icons = {"INCREASING": "^", "DECREASING": "v", "STABLE": "-", "NEW": "*"}
             direction_colors = {"INCREASING": "red", "DECREASING": "green", "STABLE": "yellow", "NEW": "cyan"}
             icon = direction_icons.get(trend.direction, "?")
             tc = direction_colors.get(trend.direction, "white")

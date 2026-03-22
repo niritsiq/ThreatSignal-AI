@@ -2,6 +2,7 @@
 
 import pytest
 
+from threatsignal.models.schemas import TrendResult
 from threatsignal.signal.trend import RiskTrend
 
 
@@ -43,3 +44,31 @@ def test_severity_change_upgrade(trend):
 def test_severity_change_same_category(trend):
     result = trend.compare(current_prob=0.12, previous_prob=0.18)
     assert result["severity_changed"] is False
+
+
+def test_format_summary_new():
+    t = TrendResult(direction="NEW", current_category="HIGH")
+    summary = t.format_summary()
+    assert "First assessment" in summary
+    assert "HIGH" in summary
+
+
+def test_format_summary_increasing():
+    t = TrendResult(direction="INCREASING", delta=0.15, current_category="HIGH", previous_category="MEDIUM")
+    summary = t.format_summary()
+    assert "↑" in summary
+    assert "INCREASING" in summary
+
+
+def test_format_summary_severity_change():
+    t = TrendResult(
+        direction="INCREASING",
+        delta=0.35,
+        current_category="CRITICAL",
+        previous_category="MEDIUM",
+        severity_changed=True,
+    )
+    summary = t.format_summary()
+    assert "severity changed" in summary
+    assert "MEDIUM" in summary
+    assert "CRITICAL" in summary

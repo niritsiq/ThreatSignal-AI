@@ -86,3 +86,17 @@ def test_probability_parsed_from_outcome_prices(client):
         mock_cls.return_value.__enter__.return_value.get.return_value = _make_response([market])
         result = client.search("okta.com")
     assert result.probability == pytest.approx(0.72)
+
+
+def test_parse_market_exception_returns_error(client):
+    """_parse_market must return status=error when the market dict causes a parse failure."""
+    bad_market = {
+        "conditionId": "abc",
+        "question": "will okta suffer a breach?",
+        "outcomePrices": ["not-a-float"],
+        "liquidity": "0",
+        "volume": "0",
+        "slug": "test",
+    }
+    result = client._parse_market(bad_market)
+    assert result.status == "error"
