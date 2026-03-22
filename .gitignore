@@ -1,5 +1,8 @@
+# secrets and environment
 .env
 .venv/
+
+# python
 __pycache__/
 *.pyc
 *.pyo
@@ -8,10 +11,31 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+
+# test and coverage
 .pytest_cache/
 .coverage
 htmlcov/
+.mypy_cache/
+
+# project output
 reports/
 data/breach_index.faiss
 *.log
+
+# OS
 .DS_Store
+.vscode/
+
+# docker and infra
+Dockerfile
+docker-compose.yml
+*.yml
+*.yaml
+
+# config files
+*.toml
+
+# deployment and scripts
+deploy/
+scripts/
