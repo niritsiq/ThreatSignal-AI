@@ -53,23 +53,6 @@ def health():
 
 
 def _load_previous_probability(domain: str, reports_dir: str = "reports") -> float | None:
-    """Find the most recent saved report for a domain and return its LLM probability."""
-    report_path = Path(reports_dir)
-    if not report_path.exists():
-        return None
-    files = sorted(report_path.glob(f"{domain}_*.json"))
-    if not files:
-        return None
-    try:
-        with open(files[-1], encoding="utf-8") as f:
-            data = json.load(f)
-        return data.get("llm_assessment", {}).get("probability")
-    except Exception as e:
-        logger.warning(f"Could not read previous report for {domain}: {e}")
-        return None
-
-
-def _load_previous_probability(domain: str, reports_dir: str = "reports") -> float | None:
     """Return the LLM probability from the most recent saved report for this domain."""
     report_path = Path(reports_dir)
     if not report_path.exists():
