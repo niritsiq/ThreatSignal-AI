@@ -18,6 +18,7 @@ Given a domain name, ThreatSignal AI estimates the probability that a company wi
 | LLM reasoning | GPT-4 function calling | Structured probability + explanation |
 | Crowd signal | Polymarket Gamma API | Prediction market probability (if available) |
 | Risk trend | Local JSON reports | INCREASING / DECREASING / STABLE / NEW vs last scan |
+| Risk chart | matplotlib | Scatter plot PNG — all 21 breach cases + current domain as gold star |
 
 ---
 
@@ -46,6 +47,9 @@ python scripts/build_index.py
 python -m threatsignal analyze --domain okta.com
 python -m threatsignal analyze --domain github.com --horizon 60
 python -m threatsignal analyze --domain microsoft.com --no-save
+# Output includes:
+#   JSON report saved to: reports/okta.com_20260324_....json
+#   Risk chart saved to:  reports/okta.com_risk_chart_20260324....png
 
 # 6. Or start the API server
 python -m threatsignal serve --port 8000
@@ -130,16 +134,34 @@ curl -X POST https://threatsignal-api.lemongrass-f695ae95.francecentral.azurecon
 
 ---
 
+## Risk Chart
+
+After every analysis a scatter plot PNG is saved to `reports/`. Open it with:
+
+```powershell
+Invoke-Item (Get-Item reports\*_risk_chart_*.png)
+```
+
+**Chart layout:**
+- X axis — Exposure Score (attack surface, 0–10)
+- Y axis — Danger Score (breach probability, 0–1)
+- Colored dots — all 21 historical breach cases (green=low, orange=medium, red=high, purple=critical)
+- Gold star — the current domain being analyzed
+
+If the star is top-right the domain has high exposure and high danger — needs immediate attention.
+
+---
+
 ## Tests
 
 ```bash
-# Fast unit tests — 92 tests, no API calls, ~2 seconds
+# Fast unit tests — 100 tests, no API calls, ~2 seconds
 python -m pytest -m "not integration" -v
 
 # Integration tests — real Shodan, OpenAI, Polymarket APIs (~15 seconds)
 python -m pytest -m integration -v --no-cov
 
-# All 100 tests with coverage report
+# All 108 tests with coverage report
 python -m pytest --cov=threatsignal --cov-report=term-missing
 ```
 
@@ -170,6 +192,7 @@ Domain
   → SignalAggregator     (model + news boost vs market delta)
   → RiskTrend            (compare vs previous scan)
   → ReportBuilder        (7-section CLI output + JSON export)
+  → RiskChart            (scatter plot PNG saved to reports/)
 ```
 
 ---
