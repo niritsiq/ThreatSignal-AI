@@ -19,6 +19,7 @@ from threatsignal.models.schemas import AnalyzeRequest, AnalyzeResponse, NewsSig
 from threatsignal.news.client import NewsClient
 from threatsignal.polymarket.client import PolymarketClient
 from threatsignal.report.builder import ReportBuilder
+from threatsignal.report.chart import RiskChart
 from threatsignal.shodan_client.client import ShodanClient
 from threatsignal.shodan_client.normalizer import AttackSurfaceNormalizer
 from threatsignal.signal.aggregator import SignalAggregator
@@ -183,6 +184,8 @@ def analyze_cmd(
     if save:
         path = ReportBuilder().save_json(result)
         typer.echo(f"\nJSON report saved to: {path}")
+    chart_path = RiskChart().generate(result, output_dir="reports")
+    typer.echo(f"Risk chart saved to:  {chart_path}")
 
 
 @cli.command()
