@@ -30,10 +30,16 @@ class EmbeddingEngine:
 
     def embed(self, text: str) -> list[float]:
         """Embed a text string, return float vector."""
+        logger.debug("Embedding text (%d chars) with model %s", len(text), self.model)
         response = self.client.embeddings.create(model=self.model, input=text)
-        return response.data[0].embedding
+        vec = response.data[0].embedding
+        logger.debug("Embedding complete — vector dim: %d", len(vec))
+        return vec
 
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Embed multiple texts in one API call."""
+        logger.info("Batch embedding %d texts with model %s", len(texts), self.model)
         response = self.client.embeddings.create(model=self.model, input=texts)
-        return [item.embedding for item in response.data]
+        results = [item.embedding for item in response.data]
+        logger.info("Batch embedding complete — %d vectors returned", len(results))
+        return results

@@ -127,7 +127,7 @@ class LLMReasoner:
         )
         tool_call = response.choices[0].message.tool_calls[0]
         data = json.loads(tool_call.function.arguments)
-        return LLMAssessment(
+        assessment = LLMAssessment(
             risk_level=data["risk_level"],
             probability=float(data["probability"]),
             confidence=float(data["confidence"]),
@@ -137,6 +137,14 @@ class LLMReasoner:
             prompt_tokens=response.usage.prompt_tokens,
             completion_tokens=response.usage.completion_tokens,
         )
+        logger.info(
+            "LLM assessment complete: risk=%s probability=%.2f confidence=%.2f tokens=%d",
+            assessment.risk_level,
+            assessment.probability,
+            assessment.confidence,
+            response.usage.total_tokens,
+        )
+        return assessment
 
     def _call_json_mode(self, user_prompt: str, attempt: int) -> LLMAssessment:
         """Fallback: call LLM with JSON response mode (no function calling)."""
@@ -165,6 +173,7 @@ class LLMReasoner:
         )
 
     def _fallback_assessment(self) -> LLMAssessment:
+        logger.error("All LLM attempts failed — returning fallback assessment")
         return LLMAssessment(
             risk_level="MEDIUM",
             probability=0.1,

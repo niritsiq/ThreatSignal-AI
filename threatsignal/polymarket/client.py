@@ -41,8 +41,10 @@ class PolymarketClient:
         for market in markets:
             question = (market.get("question") or "").lower()
             if company in question and any(k in question for k in CYBER_KEYWORDS):
+                logger.info("Polymarket cyber-incident market found for '%s': %s", company, market.get("question", ""))
                 return self._parse_market(market)
 
+        logger.info("No cyber-incident market found for '%s' among %d markets", company, len(markets))
         return PolymarketResult(
             status="not_found",
             note=f"No cyber-incident market found for '{company}' among {len(markets)} markets",

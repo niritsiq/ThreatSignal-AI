@@ -15,7 +15,9 @@ def load_cases(path: str) -> list[dict]:
         logger.warning(f"Breach dataset not found at {path}")
         return []
     with open(p, "r", encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+        cases = [json.loads(line) for line in f if line.strip()]
+    logger.info("Loaded %d breach cases from %s", len(cases), path)
+    return cases
 
 
 def save_cases(cases: list[dict], path: str):

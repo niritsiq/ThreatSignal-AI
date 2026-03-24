@@ -64,6 +64,14 @@ class AttackSurfaceNormalizer:
             attack_surface_score=round(score, 2),
         )
         surface.snapshot_text = self._build_snapshot(surface, domain)
+        logger.info(
+            "Attack surface parsed for %s: %d IPs, %d ports, %d CVEs, score=%.2f",
+            domain,
+            len(ips),
+            len(ports),
+            len(cves),
+            score,
+        )
         return surface
 
     def _compute_score(self, ports: list[int], cves: list[str], services: list[ServiceInfo]) -> float:

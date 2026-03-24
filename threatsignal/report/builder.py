@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,6 +23,8 @@ from threatsignal.models.schemas import (
     ReportMeta,
     SimilarIncident,
 )
+
+logger = logging.getLogger(__name__)
 
 RISK_COLORS = {"LOW": "green", "MEDIUM": "yellow", "HIGH": "red", "CRITICAL": "bold red"}
 
@@ -57,6 +60,7 @@ class ReportBuilder:
         path = f"{output_dir}/{response.meta.domain}_{ts}.json"
         with open(path, "w", encoding="utf-8") as f:
             json.dump(response.model_dump(), f, indent=2, ensure_ascii=False)
+        logger.info("Report saved to %s", path)
         return path
 
     def print_cli(self, response: AnalyzeResponse):

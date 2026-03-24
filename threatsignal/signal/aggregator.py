@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import logging
+
 from threatsignal.models.schemas import FinalSignal, PolymarketResult
+
+logger = logging.getLogger(__name__)
 
 
 class SignalAggregator:
@@ -10,6 +14,11 @@ class SignalAggregator:
         risk_cat = self._categorize(model_prob)
 
         if market_result.status != "found" or market_result.probability is None:
+            logger.info(
+                "Signal computed: MARKET_NOT_AVAILABLE — model_prob=%.4f category=%s",
+                model_prob,
+                risk_cat,
+            )
             return FinalSignal(
                 model_probability=round(model_prob, 4),
                 market_probability=None,
@@ -43,6 +52,14 @@ class SignalAggregator:
                 "aligned on risk (within ±10pp). No significant information asymmetry detected."
             )
 
+        logger.info(
+            "Signal computed: %s — model=%.4f market=%.4f delta=%+.4f category=%s",
+            signal,
+            model_prob,
+            market_prob,
+            delta,
+            risk_cat,
+        )
         return FinalSignal(
             model_probability=round(model_prob, 4),
             market_probability=round(market_prob, 4),
